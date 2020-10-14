@@ -1,0 +1,14 @@
+buildscript {
+	repositories {
+		maven { url "$repositoryUrl" }
+	}
+
+	dependencies {
+		classpath 'com.ajio.gradle:ajio-build-conventions:1.0.1.RELEASE'
+	}
+}
+
+apply plugin: 'com.ril.convention.root'
+
+group = 'com.ril.service'
+description = "AJIO GAMIFICATION SERVICE"

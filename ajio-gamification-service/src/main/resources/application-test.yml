@@ -1,0 +1,127 @@
+server:
+  port: 8082
+  servlet.context-path: /gamification-test
+
+spring:
+  h2:
+    console:
+      enabled: true
+  profiles:
+    active: test
+  application:
+    name: ajio-gamification-service
+  #  profiles:
+  #    active: ${PROFILE:default}
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate.ddl-auto: update
+    hbm2ddl:
+      auto: create
+    show-sql: false
+    generate-ddl: true
+    properties.hibernate:
+      format_sql: true
+      enable_lazy_load_no_trans: true
+      jdbc:
+        lob:
+          non_contextual_creation: true
+    properties.org.hibernate.envers.audit_table_suffix: _activity
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+service:
+  ajiocash:
+    eventPayload: /v1/publish/event/
+    authUrl: /auth/login
+    username: dev_1
+    password: dev_1
+    clientType: STOS
+    baseUrl: http://10.21.87.94:8080/ajiocash
+    feignClientName: gamification
+    tenantId: AJIO
+  promotion:
+    kafka.servers: localhost:9092
+    topic: abc
+    group: abc-group
+    feignClientName: gamification
+    baseUrl: http://10.21.77.178:8080
+    gamificationPromoDetail: /v1/allocateVouchers/
+    management:
+      feignClientName: gamification
+      baseUrl: http://10.21.77.173:8080
+      identifierDetail: /v1/vouchers/identifier/
+      username: amit8.saha@ril.com
+      password: 123456
+retry:
+  maxAttempts: 3
+  delayInMs: 1000
+  multiplier: 2
+cache:
+  concurrencyLimit: 100
+  kafka:
+    topic: gamification-cache
+    servers: localhost:9092
+    config:
+      topic: gamification-config
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, threaddump, heapdump, httptrace, prometheus
+  metrics:
+    export:
+      atlas:
+        enabled: false
+  endpoint:
+    health.show-details: always
+    monitoring.show-details: always
+  trace:
+    http.capacity: 10000
+  tomcat:
+    basedir: /opt/apps/flashsale/app/appDeploy/apache-tomcat/logs
+    accesslog:
+      enabled: true
+      prefix: access-log
+      file-date-format: .yyyy-MM-dd
+      suffix: .log
+      # datetime remote-ip "request-referr" status (time-taken)
+      pattern: '%t %a "%r" %s %D'
+
+logging:
+  config: classpath:logback-spring.xml
+  levels:
+    org.springframework: INFO
+    com.ril.gamification.service: INFO
+    com.ril.gamification.engine: DEBUG
+    com.ril.gamification.dao: DEBUG
+  format.jsonEnabled: false
+  appenders:
+    name: rollingfile,console
+    rollingfile:
+      directory: /opt/apps/gamification/api/logs
+      prefix: ajio-gamification-service
+
+com:
+  ril:
+    config:
+      serverList: 127.0.0.1
+      port: 8080
+      baseServicePath: gamification
+distributed:
+  lock:
+    jdbc:
+      lockAtMostFor: 15s
+      lockAtLeastFor: 10s
+      maxRecordsPerJob: 5
+      periodInSec: 1
+
+clevertap:
+  api:
+    push: https://in.api.clevertap.com/1/send/push.json
+    sms: https://in.api.clevertap.com/1/send/sms.json
+  accountId: TEST-485-5Z9-WZ5Z
+  promoGroup: AjioGamificationPromotion

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) Reliance Retail 2016. All rights reserved.
+
+    This software is the confidential and proprietary information
+    of Reliance Retail. You shall not disclose such Confidential Information
+    and shall use it only in accordance with the terms and conditions
+    entered into with Reliance Retail.
+
+-->
+<!DOCTYPE xml>
+
+<configuration debug="false">
+    <contextName>${HOSTNAME}</contextName>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+
+    <springProperty name="logging.levels.com.ril.gamification.service" source="logging.levels.com.ril.gamification.service"/>
+    <springProperty name="logging.levels.com.ril.gamification.engine" source="logging.levels.com.ril.gamification.engine"/>
+    <springProperty name="logging.levels.com.ril.gamification.dao" source="logging.levels.com.ril.gamification.dao"/>
+
+    <logger name="com.ril.gamification.service" level="${logging.levels.com.ril.gamification.service}"/>
+    <logger name="com.ril.gamification.engine" level="${logging.levels.com.ril.gamification.engine}"/>
+    <logger name="com.ril.gamification.dao" level="${logging.levels.com.ril.gamification.dao}"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    <springProperty name="logging.appenders.rollingfile.directory" source="logging.appenders.rollingfile.directory"/>
+    <springProperty name="logging.appenders.rollingfile.prefix" source="logging.appenders.rollingfile.prefix"/>
+    <springProperty name="logging.format.jsonEnabled" source="logging.format.jsonEnabled" />
+    <appender name="rollingfileSync" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.appenders.rollingfile.directory}/${logging.appenders.rollingfile.prefix}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${logging.appenders.rollingfile.directory}/${logging.appenders.rollingfile.prefix}.%d{yyyy-MM-dd_HH}.%i.log.gz
+            </fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>30GB</totalSizeCap>
+        </rollingPolicy>
+        <append>true</append>
+        <if condition='property("logging.format.jsonEnabled").equals("true")'>
+            <then>
+                <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                    <providers>
+                        <contextName>
+                            <fieldName>app</fieldName>
+                        </contextName>
+                        <timestamp>
+                            <fieldName>ts</fieldName>
+                            <pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+                            <timeZone>IST</timeZone>
+                        </timestamp>
+                        <loggerName>
+                            <fieldName>logger</fieldName>
+                        </loggerName>
+                        <logLevel>
+                            <fieldName>level</fieldName>
+                        </logLevel>
+                        <callerData>
+                            <classFieldName>class</classFieldName>
+                            <methodFieldName>method</methodFieldName>
+                            <lineFieldName>line</lineFieldName>
+                            <fileFieldName>file</fileFieldName>
+                        </callerData>
+                        <threadName>
+                            <fieldName>thread</fieldName>
+                        </threadName>
+                        <mdc/>
+                        <arguments>
+                            <includeNonStructuredArguments>false</includeNonStructuredArguments>
+                        </arguments>
+                        <stackTrace>
+                            <fieldName>stack</fieldName>
+                        </stackTrace>
+                        <message>
+                            <fieldName>msg</fieldName>
+                        </message>
+                    </providers>
+                </encoder>
+            </then>
+            <else>
+                <encoder>
+                    <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %X{REQUEST_ID}
+                        %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan}
+                        %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}
+                    </pattern>
+                </encoder>
+            </else>
+        </if>
+    </appender>
+    <appender name="rollingfile" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="rollingfileSync"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+    <springProperty name="logging.appenders.name" source="logging.appenders.name"/>
+    <root level="INFO">
+        <if condition='isDefined("logging.appenders.name")'>
+            <then>
+                <if condition='property("logging.appenders.name").contains("console")'>
+                    <then>
+                        <appender-ref ref="console" additivity="false"/>
+                    </then>
+                </if>
+                <if condition='property("logging.appenders.name").contains("rollingfile")'>
+                    <then>
+                        <appender-ref ref="rollingfile" additivity="false"/>
+                    </then>
+                </if>
+            </then>
+            <else>
+                <appender-ref ref="console"/>
+            </else>
+        </if>
+    </root>
+</configuration>

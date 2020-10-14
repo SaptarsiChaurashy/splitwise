@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        maven { url "$repositoryUrl" }
+
+    }
+    dependencies {
+        classpath 'com.ajio.gradle:ajio-build-conventions:1.0.1.RELEASE'
+        classpath 'gradle.plugin.com.boxfuse.client:flyway-release:4.2.0'
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+    }
+}
+
+group = 'com.ril.gamification'
+description = "AJIO GAMIFICATION DAO"
+
+/** SET PROJECT VERSION FROM ROOT PROJECT */
+def projectProperties = new Properties()
+file("../gradle.properties").withInputStream { projectProperties.load(it) }
+version = projectProperties.getProperty("version")
+
+apply plugin: 'com.ril.convention.root'
+apply plugin: 'com.ril.convention.spring-module'
+apply plugin: "io.spring.dependency-management"
+
+repositories {
+    maven { url "$repositoryUrl" }
+}
+dependencyManagement {
+    imports {
+        mavenBom "com.ajio.tools:ajio-build-dependencies:1.0.1.RELEASE"
+    }
+}
+ext {
+    lombokVersion = "1.18.4"
+    javaxVersion = '2.5'
+    jacksonVersion = "1.9.13"
+    springDataJpaVersion = '2.1.3.RELEASE'
+    hibernateEnvVersion = '5.4.0.Final'
+}
+
+dependencies {
+    compile project(":ajio-commons")
+    compile project(":ajio-gamification-engine")
+    compile group: 'joda-time', name: 'joda-time', version: '2.10.5'
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    compile("org.projectlombok:lombok:$lombokVersion")
+    compile("org.springframework.data:spring-data-jpa:$springDataJpaVersion")
+    compile("org.hibernate:hibernate-envers:$hibernateEnvVersion")
+
+    //test dependencies
+    testImplementation 'org.mockito:mockito-core:2.7.22'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.springframework', name: 'spring-test'
+    testCompile "org.mockito:mockito-core:2.7.22"
+    testImplementation('junit:junit:4.13')
+}

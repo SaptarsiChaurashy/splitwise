@@ -1,0 +1,4 @@
+rootProject.name = 'ajio-gamification-service'
+includeFlat 'ajio-gamification-dao'
+includeFlat 'ajio-gamification-engine'
+includeFlat 'ajio-commons'

@@ -1,0 +1,78 @@
+server:
+  port: 8080
+  servlet.context-path: /gamification
+spring:
+  h2:
+    console:
+      enabled: true
+  profiles:
+    active: test
+  application:
+    name: ajio-gamification-service
+  #  profiles:
+  #    active: ${PROFILE:default}
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate.ddl-auto: update
+    hbm2ddl:
+      auto: create
+    show-sql: true
+    generate-ddl: true
+    properties.hibernate:
+      format_sql: true
+      enable_lazy_load_no_trans: true
+      jdbc:
+        lob:
+          non_contextual_creation: true
+    properties.org.hibernate.envers.audit_table_suffix: _activity
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, threaddump, heapdump, httptrace, prometheus
+  metrics:
+    export:
+      atlas:
+        enabled: false
+  endpoint:
+    health.show-details: always
+    monitoring.show-details: always
+  trace:
+    http.capacity: 10000
+  tomcat:
+    basedir: /opt/apps/flashsale/app/appDeploy/apache-tomcat/logs
+    accesslog:
+      enabled: true
+      prefix: access-log
+      file-date-format: .yyyy-MM-dd
+      suffix: .log
+      # datetime remote-ip "request-referr" status (time-taken)
+      pattern: '%t %a "%r" %s %D'
+
+logging:
+  config: classpath:logback-spring.xml
+  levels:
+    org.springframework: INFO
+    com.ril.gamification.service: INFO
+    com.ril.gamification.engine: DEBUG
+    com.ril.gamification.dao: DEBUG
+  format.jsonEnabled: false
+  appenders:
+    name: rollingfile,console
+    rollingfile:
+      directory: /opt/apps/gamification/api/logs
+      prefix: ajio-gamification-service
+
+com:
+  ril:
+    config:
+      serverList: 127.0.0.1
+      port: 8080
+      baseServicePath: gamification
